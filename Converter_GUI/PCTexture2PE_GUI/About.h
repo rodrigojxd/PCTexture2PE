@@ -36,11 +36,6 @@ namespace PCTexture2PE_GUI {
 		}
 	private: System::Windows::Forms::Button^  button10;
 	private: System::Windows::Forms::Label^  copyRight;
-
-
-
-
-
 	private: System::Windows::Forms::LinkLabel^  creatorLinkLabel;
 	private: System::Windows::Forms::Label^  versionLabel;
 	private: System::Windows::Forms::LinkLabel^  ForumLinkLabel;
@@ -155,26 +150,6 @@ namespace PCTexture2PE_GUI {
 #pragma endregion
 	private: System::Void closeButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		Close();
-	}
-	private: bool isMouseDown = false;
-	private: Point mouseOffset;
-	private: System::Void panel1_MouseDown(System::Object^  sender, MouseEventArgs^  e) {
-		if (e->Button == System::Windows::Forms::MouseButtons::Left) {
-			mouseOffset = Point(-e->X, -e->Y);
-			isMouseDown = true;
-		}
-	}
-	private: System::Void panel1_MouseMove(System::Object^  sender, MouseEventArgs^  e) {
-		if (isMouseDown) {
-			Point mousePos = Control::MousePosition;
-			mousePos.Offset(mouseOffset.X, mouseOffset.Y);
-			Location = mousePos;
-		}
-	}
-	private: System::Void panel1_MouseUp(System::Object^  sender, MouseEventArgs^  e) {
-		if (e->Button == System::Windows::Forms::MouseButtons::Left) {
-			isMouseDown = false;
-		}
 	}
 	private: System::Void creatorLinkLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
 		//ShellExecute(NULL, L"open", L"https://twitter.com/rodrigojxd", NULL, NULL, SW_SHOWNORMAL);

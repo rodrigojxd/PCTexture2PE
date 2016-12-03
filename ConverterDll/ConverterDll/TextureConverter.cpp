@@ -805,7 +805,7 @@ namespace ConverterFuncs {
 		copyTexture("models", outPack + "\\textures\\models");
 		copyTexture("painting", outPack + "\\textures\\painting");
 		copyTexture("particle", outPack + "\\textures\\particle");
-		//copyTexture("font"       , outPack + "\\textures\\font"); //MCPC does not have a good font support
+		//copyTexture("font"       , outPack + "\\textures\\font"); //MCPE does not have a good font support
 
 		fsCreate_directory(outPack + "\\textures\\gui");
 		copyTexture("gui\\title\\background", outPack + "\\textures\\gui\\background");
