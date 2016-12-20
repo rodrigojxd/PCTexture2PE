@@ -24,7 +24,7 @@ namespace ConverterFuncs {
 	{
 		if (fs::exists(old_))
 		{
-			Print("Coping: " + old_);
+			Print("Copying: " + old_);
 			fs::copy(old_, new_, err);
 			Print(err.message());
 		}
@@ -33,7 +33,7 @@ namespace ConverterFuncs {
 	{
 		if (fs::exists(old_))
 		{
-			Print("Coping: " + old_);
+			Print("Copying: " + old_);
 			fs::copy(old_, new_, fs::copy_options::recursive, err);
 			Print(err.message());
 		}
