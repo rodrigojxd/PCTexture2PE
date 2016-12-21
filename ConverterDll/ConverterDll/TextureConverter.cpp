@@ -714,6 +714,22 @@ namespace ConverterFuncs {
 			}
 		}
 	}
+	void CropTripWire(const string& path)
+	{//MCPE uses only the second part/frame of the texture
+		if (fs::exists(path))
+		{
+			Mat img = imread(path, IMREAD_UNCHANGED);
+			if (!img.empty())
+			{
+				int multp = img.rows / 16;
+				Mat ROI(img, Rect(0, 4 * multp, img.cols, 4 * multp));
+				Mat img2 = Mat(img.rows, img.cols, img.type(), Scalar(0, 0, 0, 0));
+				Mat ROI2(img2, Rect(0, 0, img.cols, 4 * multp));
+				ROI.copyTo(ROI2);
+				imwrite(path, img2);
+			}
+		}
+	}
 	
 	void operator << (ofstream& file, vector<string>& vec)
 	{
@@ -832,6 +848,8 @@ namespace ConverterFuncs {
 		fsRename(itemsPath + "jungle_boat.png", itemsPath + "boat_jungle.png");
 		fsRename(itemsPath + "oak_boat.png", itemsPath + "boat_oak.png");
 		fsRename(itemsPath + "spruce_boat.png", itemsPath + "boat_spruce.png");
+		fsRename(itemsPath + "beetroot_seeds.png", itemsPath + "seeds_beetroot.png");
+		fsRename(itemsPath + "dragon_breath.png", itemsPath + "dragons_breath.png");
 
 		fsRename(outPack + "\\textures\\painting\\paintings_kristoffer_zetterstrand.png", outPack + "\\textures\\painting\\kz.png");
 
@@ -1094,6 +1112,8 @@ namespace ConverterFuncs {
 		CreateCauldronWater(blocksPath + "water_still.png", blocksPath + "cauldron_water.png");
 		CreateStatic(blocksPath + "cauldron_water.png", blocksPath + "cauldron_water_placeholder.png");
 		
+		CropTripWire(blocksPath + "trip_wire.png");
+
 		//del useless files
 		{
 #define removeEntityDir(name) fsRemoveAll(entityPath + name);
@@ -1148,7 +1168,6 @@ namespace ConverterFuncs {
 			removeItem("record_wait.png");
 			removeItem("record_ward.png");
 			removeItem("ruby.png");
-			removeItem("shulker_shell.png");
 			removeItem("structure_void.png");
 			removeItem("totem.png");
 			removeItem("wooden_armorstand.png");
