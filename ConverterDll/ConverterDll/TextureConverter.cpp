@@ -832,6 +832,8 @@ namespace ConverterFuncs {
 		fsRename(itemsPath + "jungle_boat.png", itemsPath + "boat_jungle.png");
 		fsRename(itemsPath + "oak_boat.png", itemsPath + "boat_oak.png");
 		fsRename(itemsPath + "spruce_boat.png", itemsPath + "boat_spruce.png");
+		fsRename(itemsPath + "beetroot_seeds.png", itemsPath + "seeds_beetroot.png");
+		fsRename(itemsPath + "dragon_breath.png", itemsPath + "dragons_breath.png");
 
 		fsRename(outPack + "\\textures\\painting\\paintings_kristoffer_zetterstrand.png", outPack + "\\textures\\painting\\kz.png");
 
@@ -1148,7 +1150,6 @@ namespace ConverterFuncs {
 			removeItem("record_wait.png");
 			removeItem("record_ward.png");
 			removeItem("ruby.png");
-			removeItem("shulker_shell.png");
 			removeItem("structure_void.png");
 			removeItem("totem.png");
 			removeItem("wooden_armorstand.png");
