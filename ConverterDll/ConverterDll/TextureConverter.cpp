@@ -714,6 +714,22 @@ namespace ConverterFuncs {
 			}
 		}
 	}
+	void CropTripWire(const string& path)
+	{//MCPE uses only the second part/frame of the texture
+		if (fs::exists(path))
+		{
+			Mat img = imread(path, IMREAD_UNCHANGED);
+			if (!img.empty())
+			{
+				int multp = img.rows / 16;
+				Mat ROI(img, Rect(0, 4 * multp, img.cols, 4 * multp));
+				Mat img2 = Mat(img.rows, img.cols, img.type(), Scalar(0, 0, 0, 0));
+				Mat ROI2(img2, Rect(0, 0, img.cols, 4 * multp));
+				ROI.copyTo(ROI2);
+				imwrite(path, img2);
+			}
+		}
+	}
 	
 	void operator << (ofstream& file, vector<string>& vec)
 	{
@@ -1096,6 +1112,8 @@ namespace ConverterFuncs {
 		CreateCauldronWater(blocksPath + "water_still.png", blocksPath + "cauldron_water.png");
 		CreateStatic(blocksPath + "cauldron_water.png", blocksPath + "cauldron_water_placeholder.png");
 		
+		CropTripWire(blocksPath + "trip_wire.png");
+
 		//del useless files
 		{
 #define removeEntityDir(name) fsRemoveAll(entityPath + name);

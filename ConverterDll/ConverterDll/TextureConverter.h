@@ -59,6 +59,7 @@ namespace ConverterFuncs {
 	void OverlapEnderman(const string& base, const string& overlay);
 	void CreateCauldronWater(const string& path, const string& newPath);
 	void CheckForAnimated(const string& path);
+	void CropTripWire(const string& path);
 	
 	void operator << (ofstream& file, vector<string>& vec);
 	
