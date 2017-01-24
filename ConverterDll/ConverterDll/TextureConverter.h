@@ -65,7 +65,7 @@ namespace ConverterFuncs {
 	
 	
 	Converter_API int ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder);
-	Converter_API const std::string GetLog();
+	Converter_API const std::vector<std::string> *GetLog();
 	
 	
 	std::vector<std::string> outputLog;

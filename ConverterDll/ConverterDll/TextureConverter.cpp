@@ -1280,14 +1280,9 @@ namespace ConverterFuncs {
 		Print("\r\nDone!\r\n");
 		return 0;
 	}
-	const std::string GetLog()
+	const std::vector<std::string> *GetLog()
 	{
-		std::string tmp;
-		for (uint i = 0; i < outputLog.size(); ++i)
-		{
-			tmp += outputLog[i];
-		}
-		return tmp;
+		return &outputLog;
 	}
 }
 

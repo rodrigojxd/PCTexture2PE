@@ -9,10 +9,11 @@
 namespace ConverterFuncs
 {
 	int ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder);
-	const std::string GetLog();
+	const std::vector<std::string> *GetLog();
 }
 
-bool started = false;
+bool started = false; //Indicates whether a conversion is running
+int logcount = 0; //n of log lines printed on logbox
 
 namespace PCTexture2PE_GUI {
 
@@ -313,13 +314,15 @@ namespace PCTexture2PE_GUI {
 
 		void SetTextBoxOnce()
 		{
-			String^ log = toSysString(ConverterFuncs::GetLog());
-			int sz1 = log->Length;
-			int sz2 = this->logBox->TextLength;
-			if (sz1 > sz2)
+			const std::vector<std::string>* log = ConverterFuncs::GetLog();
+			int sz1 = log->size();
+			if (sz1 > logcount) //If there is any new log
 			{
-				log = log->Substring(sz2); //Removes the part of the log that is already in the box
-				this->logBox->AppendText(log); //add th log and change the scroll to the end
+				for (int i = logcount; i < sz1; ++i) //Looks at all the lines of the log that are not yet in the box
+				{
+					this->logBox->AppendText(toSysString(log->at(i))); //add the log and change the scroll to the end
+				}
+				logcount++;
 			}
 		}
 
@@ -327,6 +330,7 @@ namespace PCTexture2PE_GUI {
 		{
 			this->logBox->Text = ""; //clean the logbox
 			this->logBox->Update(); //force a update
+			logcount = 0; //reset the counter
 			while (started)
 			{
 				this->Invoke(gcnew MethodInvoker(this, &MainForm::SetTextBoxOnce));
@@ -341,7 +345,7 @@ namespace PCTexture2PE_GUI {
 			std::string name = marshal_as< std::string >(packNameBox->Text);
 			std::string output = marshal_as< std::string >(outputFolderBrowser->SelectedPath);
 			ConverterFuncs::ConvertPack(pack, name, output);
-			Sleep(300); //wait for the last SetTextBoxOnce
+			Sleep(5000); //wait for the last SetTextBoxOnce
 			started = false;
 			System::Media::SystemSounds::Asterisk->Play();
 		}
