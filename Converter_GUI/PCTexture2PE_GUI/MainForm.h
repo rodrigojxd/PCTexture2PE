@@ -68,6 +68,8 @@ namespace PCTexture2PE_GUI {
 	private: System::Windows::Forms::Label^  outputFolderLabel;
 	private: System::Windows::Forms::Label^  inputPackLabel;
 	private: System::Windows::Forms::GroupBox^  progressGroupBox;
+	private: System::ComponentModel::BackgroundWorker^  bkWorker_logbox;
+	private: System::ComponentModel::BackgroundWorker^  bkWorker_converter;
 
 
 	private:
@@ -105,6 +107,8 @@ namespace PCTexture2PE_GUI {
 			this->outputFolderLabel = (gcnew System::Windows::Forms::Label());
 			this->inputPackLabel = (gcnew System::Windows::Forms::Label());
 			this->progressGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->bkWorker_logbox = (gcnew System::ComponentModel::BackgroundWorker());
+			this->bkWorker_converter = (gcnew System::ComponentModel::BackgroundWorker());
 			this->settingsGroupBox->SuspendLayout();
 			this->SuspendLayout();
 			// 
@@ -280,6 +284,14 @@ namespace PCTexture2PE_GUI {
 			this->progressGroupBox->TabStop = false;
 			this->progressGroupBox->Text = L"Progress";
 			// 
+			// bkWorker_logbox
+			// 
+			this->bkWorker_logbox->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &MainForm::bkWorker_logbox_DoWork);
+			// 
+			// bkWorker_converter
+			// 
+			this->bkWorker_converter->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &MainForm::bkWorker_converter_DoWork);
+			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -333,7 +345,7 @@ namespace PCTexture2PE_GUI {
 			logcount = 0; //reset the counter
 			while (started)
 			{
-				this->Invoke(gcnew MethodInvoker(this, &MainForm::SetTextBoxOnce));
+				SetTextBoxOnce();
 				Sleep(50);
 			}
 		}
@@ -375,11 +387,8 @@ namespace PCTexture2PE_GUI {
 			}
 
 			started = true;
-			Thread^ tThread = gcnew Thread(gcnew ThreadStart(this, &MainForm::RegisterLog));
-			tThread->Start();
-
-			Thread^ nThread = gcnew Thread(gcnew ThreadStart(this, &MainForm::convert));
-			nThread->Start();
+			this->bkWorker_logbox->RunWorkerAsync();
+			this->bkWorker_converter->RunWorkerAsync();
 		}
 		else
 		{
@@ -447,6 +456,12 @@ namespace PCTexture2PE_GUI {
 	private: System::Void outputFolderBox_Leave(System::Object^  sender, System::EventArgs^  e)
 	{
 		outputFolderBrowser->SelectedPath = outputFolderBox->Text;
+	}
+	private: System::Void bkWorker_logbox_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
+		RegisterLog();
+	}
+	private: System::Void bkWorker_converter_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
+		convert();
 	}
 };
 }
