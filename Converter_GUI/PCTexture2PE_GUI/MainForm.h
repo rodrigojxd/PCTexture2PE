@@ -3,14 +3,7 @@
 //#include <iostream>
 #include <msclr/marshal_cppstd.h> // for convert System::String to std::string and vice-versa
 #include "About.h"
-//#include "TextureConverter.h"
-
-//from ConverterDll. I know, it's not the best way
-namespace ConverterFuncs
-{
-	int ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder);
-	const std::vector<std::string> *GetLog();
-}
+#include "TextureConverter.h"
 
 bool started = false; //Indicates whether a conversion is running
 int logcount = 0; //n of log lines printed on logbox
@@ -277,9 +270,9 @@ namespace PCTexture2PE_GUI {
 			// progressGroupBox
 			// 
 			this->progressGroupBox->ForeColor = System::Drawing::SystemColors::ControlLight;
-			this->progressGroupBox->Location = System::Drawing::Point(12, 185);
+			this->progressGroupBox->Location = System::Drawing::Point(11, 185);
 			this->progressGroupBox->Name = L"progressGroupBox";
-			this->progressGroupBox->Size = System::Drawing::Size(367, 209);
+			this->progressGroupBox->Size = System::Drawing::Size(368, 209);
 			this->progressGroupBox->TabIndex = 25;
 			this->progressGroupBox->TabStop = false;
 			this->progressGroupBox->Text = L"Progress";
@@ -318,49 +311,11 @@ namespace PCTexture2PE_GUI {
 		}
 #pragma endregion
 
-		//convert std::string to System::String^
-		String^ toSysString(const std::string& s)
-		{
-			return marshal_as< String^ >(s);
-		}
-
-		void SetTextBoxOnce()
-		{
-			const std::vector<std::string>* log = ConverterFuncs::GetLog();
-			int sz1 = log->size();
-			if (sz1 > logcount) //If there is any new log
-			{
-				for (int i = logcount; i < sz1; ++i) //Looks at all the lines of the log that are not yet in the box
-				{
-					this->logBox->AppendText(toSysString(log->at(i))); //add the log and change the scroll to the end
-				}
-				logcount++;
-			}
-		}
-
-		void RegisterLog()
-		{
-			this->logBox->Text = ""; //clean the logbox
-			this->logBox->Update(); //force a update
-			logcount = 0; //reset the counter
-			while (started)
-			{
-				SetTextBoxOnce();
-				Sleep(50);
-			}
-		}
-
-		void convert()
-		{
-			String^ tmp = inputFile->FileName->Remove(inputFile->FileName->LastIndexOf("\\"));
-			std::string pack = marshal_as< std::string >(tmp);
-			std::string name = marshal_as< std::string >(packNameBox->Text);
-			std::string output = marshal_as< std::string >(outputFolderBrowser->SelectedPath);
-			ConverterFuncs::ConvertPack(pack, name, output);
-			Sleep(5000); //wait for the last SetTextBoxOnce
-			started = false;
-			System::Media::SystemSounds::Asterisk->Play();
-		}
+	//convert std::string to System::String^
+	private: String^ toSysString(const std::string& s)
+	{
+		return marshal_as< String^ >(s);
+	}
 
 	private: System::Void button_Start_Click(System::Object^  sender, System::EventArgs^  e)
 	{
@@ -458,10 +413,33 @@ namespace PCTexture2PE_GUI {
 		outputFolderBrowser->SelectedPath = outputFolderBox->Text;
 	}
 	private: System::Void bkWorker_logbox_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
-		RegisterLog();
+		this->logBox->Text = ""; //clean the logbox
+		this->logBox->Update(); //force a update
+		logcount = 0; //reset the counter
+		while (started)
+		{
+			const std::vector<std::string>* log = ConverterFuncs::GetLog();
+			int sz1 = log->size();
+			if (sz1 > logcount) //If there is any new log
+			{
+				for (int i = logcount; i < sz1; ++i) //Looks at all the lines of the log that are not yet in the box
+				{
+					this->logBox->AppendText(toSysString(log->at(i) + "\r\n")); //add the log
+				}
+				logcount++;
+			}
+			Sleep(50);
+		}
 	}
 	private: System::Void bkWorker_converter_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
-		convert();
+		String^ tmp = inputFile->FileName->Remove(inputFile->FileName->LastIndexOf("\\"));
+		std::string pack = marshal_as< std::string >(tmp);
+		std::string name = marshal_as< std::string >(packNameBox->Text);
+		std::string output = marshal_as< std::string >(outputFolderBrowser->SelectedPath);
+		ConverterFuncs::ConvertPack(pack, name, output);
+		Sleep(5000); //wait for the last log
+		started = false;
+		System::Media::SystemSounds::Asterisk->Play();
 	}
 };
 }

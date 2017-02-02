@@ -1,29 +1,25 @@
 #pragma once
+#include <string>
+#include <vector>
+
 #ifdef Converter_EXPORTS
 #define Converter_API __declspec(dllexport)
+
+#include <sstream>
+#include <Rpc.h> //for UUID (need to include RpcRT4.Lib from windows kits)
+
+//image editing
+#include "opencv2/imgproc/imgproc.hpp"
+#include "Color.h"
+
+using namespace std;
+
 #else
 #define Converter_API __declspec(dllimport)
 #endif
 
-#include <Windows.h>
-#include <iostream>
-#include <filesystem>
-#include <sstream>
-#include <Rpc.h> //for UUID (need to include RpcRT4.Lib from windows kits)
-#include <string>
-#include <vector>
-
-//image editing
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "tga.h"
-
-using namespace std;
-using namespace cv;
-namespace fs = std::experimental::filesystem;
-
 namespace ConverterFuncs {
-
+#ifdef Converter_EXPORTS
 	void Print(const string& text);
 	void delUseless(const string& path);
 	void fsCopy(const string& old_, const string& new_);
@@ -37,10 +33,10 @@ namespace ConverterFuncs {
 	
 	const std::string newUUID();
 	
-	Mat PushOnSide(const Mat& img, const Mat& img2);
-	Mat blend_multiply(const Mat& level1, const int& opacity, const Color& cor);
-	void EqualizeSizes(Mat& img, Mat& img2);
-	void CopyTo(const Mat4b& src, Mat4b& dst, const int& alphaFilter);
+	cv::Mat PushOnSide(const cv::Mat& img, const cv::Mat& img2);
+	cv::Mat blend_multiply(const cv::Mat& level1, const int& opacity, const Color& cor);
+	void EqualizeSizes(cv::Mat& img, cv::Mat& img2);
+	void CopyTo(const cv::Mat4b& src, cv::Mat4b& dst, const int& alphaFilter);
 	
 	void CutHalf(const string& old, const string& new_);
 	void CreateStatic(const string& old, const string& new_);
@@ -62,11 +58,6 @@ namespace ConverterFuncs {
 	void CropTripWire(const string& path);
 	
 	void operator << (ofstream& file, vector<string>& vec);
-	
-	
-	Converter_API int ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder);
-	Converter_API const std::vector<std::string> *GetLog();
-	
 	
 	std::vector<std::string> outputLog;
 	vector<string> manifestModel = {
@@ -97,4 +88,7 @@ namespace ConverterFuncs {
 		"watch_atlas.png"
 	};
 	error_code err;
+#endif
+	Converter_API int ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder);
+	Converter_API const std::vector<std::string> *GetLog();
 }

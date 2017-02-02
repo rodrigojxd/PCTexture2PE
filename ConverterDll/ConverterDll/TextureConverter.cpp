@@ -1,11 +1,18 @@
 #include "TextureConverter.h"
+#include <Windows.h>
+#include <iostream>
+#include <filesystem>
+#include "tga.h"
+#include "opencv2/imgcodecs.hpp"
 
+namespace fs = std::experimental::filesystem;
+using namespace cv;
 
 namespace ConverterFuncs {
 
 	void Print(const string & text)
 	{
-		outputLog.push_back("\r\n" + text);
+		outputLog.push_back(text);
 	}
 	void delUseless(const string& path)
 	{

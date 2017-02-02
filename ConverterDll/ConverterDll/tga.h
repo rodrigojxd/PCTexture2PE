@@ -1,8 +1,6 @@
-#ifndef __IMAGE_SAVER__
-#define __IMAGE_SAVER__
+#pragma once
 
 //includes
-#include <vector>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -30,14 +28,6 @@ public:
 
 	void WriteImage(string filename);
 
-//General getters and setters
-
-	void setWidth(short width);
-	void setHeight(short height);
-
-	short getWidth();
-	short getHeight();
-
 private:
 
 	//store the pixels
@@ -47,11 +37,5 @@ private:
 	short m_width;
 
 	//convert 2D to 1D indexing
-	int convert2dto1d(int x, int y); 
-
-	
-
+	int convert2dto1d(int x, int y);
 };
-
-
-#endif
