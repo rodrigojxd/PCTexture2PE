@@ -384,6 +384,11 @@ namespace PCTexture2PE_GUI {
 	{
 		return marshal_as< String^ >(s);
 	}
+	//convert System::String^ to std::string
+	private: std::string toStdString(String^ s)
+	{
+		return marshal_as< std::string >(s);
+	}
 
 	private: System::Void button_Start_Click(System::Object^  sender, System::EventArgs^  e)
 	{
@@ -520,39 +525,37 @@ namespace PCTexture2PE_GUI {
 
 	private: System::Void bkWorker_converter_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
 		
-		std::string pack;
-		std::string name = marshal_as< std::string >(packNameBox->Text);
-		std::string output = marshal_as< std::string >(this->outputFolderBrowser->SelectedPath);
+		String^ pack;
+		String^ name = this->packNameBox->Text;
+		String^ output = this->outputFolderBrowser->SelectedPath;
 
 		if (this->inTypeCmbBox->SelectedIndex == 0) //folder
 		{
-			String^ tmp = this->inputFile->FileName->Remove(this->inputFile->FileName->LastIndexOf("\\")); //remove the "pack.meta"
-			pack = marshal_as< std::string >(tmp);
+			pack = this->inputFile->FileName->Remove(this->inputFile->FileName->LastIndexOf("\\")); //remove the "pack.meta"
 		}
 		else //.zip
 		{
 			pack = output + "\\" + name + "_tmp";
 			appendTex2Logbox("Extracting the zip file");
-			zip_api::extractAll(marshal_as< std::string >(this->inputFile->FileName), pack); //extract to a temp folder
+			zip_api::extractAll(toStdString(this->inputFile->FileName), toStdString(pack)); //extract to a temp folder
 		}
 
-		ConverterFuncs::ConvertPack(pack, name, output);
+		ConverterFuncs::ConvertPack(toStdString(pack), toStdString(name), toStdString(output));
 
 		if (this->outTypeCmbBox->SelectedIndex > 0) //.zip or .mcpack
 		{
+			String^ outFolder = output + "\\" + name + "_PE"; //ConverterDll puts "_PE"
 			appendTex2Logbox("Compressing the zip file");
-			zip_api::compressAll(output + "\\" + name + "_PE", output + "\\" + name +
-				marshal_as< std::string >(this->outTypeCmbBox->Text));  //ConverterDll puts "_PE"
-			String^ outFolder = marshal_as<String^>(output + "\\" + name + "_PE");
+			zip_api::compressAll(toStdString(outFolder),
+				toStdString(output + "\\" + name + this->outTypeCmbBox->Text));
 			appendTex2Logbox("Deleting temp files: " + outFolder);
 			System::IO::Directory::Delete(outFolder, true); //delete the tmp folder from converter
 		}
 		
 		if (this->inTypeCmbBox->SelectedIndex > 0) //.zip
 		{
-			String^ _pack = marshal_as<String^>(pack);
-			appendTex2Logbox("Deleting temp files: " + _pack);
-			System::IO::Directory::Delete(_pack, true); //delete the tmp folder from .zip source
+			appendTex2Logbox("Deleting temp files: " + pack);
+			System::IO::Directory::Delete(pack, true); //delete the tmp folder from .zip source
 		}
 
 		Sleep(1000); //wait for the last log
