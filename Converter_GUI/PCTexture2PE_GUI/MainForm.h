@@ -4,6 +4,7 @@
 #include <msclr/marshal_cppstd.h> // for convert System::String to std::string and vice-versa
 #include "About.h"
 #include "TextureConverter.h"
+#include "zip_api.h"
 
 bool started = false; //Indicates whether a conversion is running
 int logcount = 0; //n of log lines printed on logbox
@@ -29,6 +30,8 @@ namespace PCTexture2PE_GUI {
 		MainForm(void)
 		{
 			InitializeComponent();
+			this->inTypeCmbBox->SelectedIndex = 1; //.zip
+			this->outTypeCmbBox->SelectedIndex = 1; //.zip
 			//
 			//TODO: Add the constructor code here
 			//
@@ -63,8 +66,12 @@ namespace PCTexture2PE_GUI {
 	private: System::Windows::Forms::GroupBox^  progressGroupBox;
 	private: System::ComponentModel::BackgroundWorker^  bkWorker_logbox;
 	private: System::ComponentModel::BackgroundWorker^  bkWorker_converter;
-
-
+	private: System::Windows::Forms::ComboBox^  inTypeCmbBox;
+	private: System::Windows::Forms::ComboBox^  outTypeCmbBox;
+	private: System::Windows::Forms::Label^  label2;
+	private: System::Windows::Forms::Label^  label1;
+	
+	
 	private:
 
 
@@ -96,6 +103,10 @@ namespace PCTexture2PE_GUI {
 			this->logBox = (gcnew System::Windows::Forms::TextBox());
 			this->inputFile = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->settingsGroupBox = (gcnew System::Windows::Forms::GroupBox());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->outTypeCmbBox = (gcnew System::Windows::Forms::ComboBox());
+			this->inTypeCmbBox = (gcnew System::Windows::Forms::ComboBox());
 			this->packNameLabel = (gcnew System::Windows::Forms::Label());
 			this->outputFolderLabel = (gcnew System::Windows::Forms::Label());
 			this->inputPackLabel = (gcnew System::Windows::Forms::Label());
@@ -109,7 +120,7 @@ namespace PCTexture2PE_GUI {
 			// 
 			this->button_Start->BackColor = System::Drawing::SystemColors::Control;
 			this->button_Start->Cursor = System::Windows::Forms::Cursors::Hand;
-			this->button_Start->Location = System::Drawing::Point(12, 145);
+			this->button_Start->Location = System::Drawing::Point(12, 151);
 			this->button_Start->Name = L"button_Start";
 			this->button_Start->Size = System::Drawing::Size(367, 28);
 			this->button_Start->TabIndex = 0;
@@ -128,7 +139,7 @@ namespace PCTexture2PE_GUI {
 			this->inputFolderButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->inputFolderButton->ForeColor = System::Drawing::SystemColors::ControlText;
-			this->inputFolderButton->Location = System::Drawing::Point(334, 18);
+			this->inputFolderButton->Location = System::Drawing::Point(334, 54);
 			this->inputFolderButton->Name = L"inputFolderButton";
 			this->inputFolderButton->Size = System::Drawing::Size(25, 20);
 			this->inputFolderButton->TabIndex = 13;
@@ -141,7 +152,7 @@ namespace PCTexture2PE_GUI {
 			this->outputFolderButton->BackColor = System::Drawing::SystemColors::Control;
 			this->outputFolderButton->Cursor = System::Windows::Forms::Cursors::Hand;
 			this->outputFolderButton->ForeColor = System::Drawing::SystemColors::ControlText;
-			this->outputFolderButton->Location = System::Drawing::Point(334, 47);
+			this->outputFolderButton->Location = System::Drawing::Point(334, 80);
 			this->outputFolderButton->Name = L"outputFolderButton";
 			this->outputFolderButton->Size = System::Drawing::Size(25, 20);
 			this->outputFolderButton->TabIndex = 14;
@@ -151,7 +162,7 @@ namespace PCTexture2PE_GUI {
 			// 
 			// inputFolderBox
 			// 
-			this->inputFolderBox->Location = System::Drawing::Point(79, 18);
+			this->inputFolderBox->Location = System::Drawing::Point(79, 54);
 			this->inputFolderBox->Name = L"inputFolderBox";
 			this->inputFolderBox->Size = System::Drawing::Size(253, 20);
 			this->inputFolderBox->TabIndex = 15;
@@ -160,7 +171,7 @@ namespace PCTexture2PE_GUI {
 			// 
 			// outputFolderBox
 			// 
-			this->outputFolderBox->Location = System::Drawing::Point(79, 47);
+			this->outputFolderBox->Location = System::Drawing::Point(79, 80);
 			this->outputFolderBox->Name = L"outputFolderBox";
 			this->outputFolderBox->Size = System::Drawing::Size(253, 20);
 			this->outputFolderBox->TabIndex = 16;
@@ -183,7 +194,7 @@ namespace PCTexture2PE_GUI {
 			// 
 			// packNameBox
 			// 
-			this->packNameBox->Location = System::Drawing::Point(79, 76);
+			this->packNameBox->Location = System::Drawing::Point(79, 106);
 			this->packNameBox->Name = L"packNameBox";
 			this->packNameBox->Size = System::Drawing::Size(280, 20);
 			this->packNameBox->TabIndex = 18;
@@ -204,12 +215,16 @@ namespace PCTexture2PE_GUI {
 			// 
 			// inputFile
 			// 
-			this->inputFile->Filter = L"pack.mcmeta|*.mcmeta";
+			this->inputFile->Filter = L"|*.zip";
 			this->inputFile->InitialDirectory = L"Desktop";
 			// 
 			// settingsGroupBox
 			// 
 			this->settingsGroupBox->BackgroundImageLayout = System::Windows::Forms::ImageLayout::None;
+			this->settingsGroupBox->Controls->Add(this->label2);
+			this->settingsGroupBox->Controls->Add(this->label1);
+			this->settingsGroupBox->Controls->Add(this->outTypeCmbBox);
+			this->settingsGroupBox->Controls->Add(this->inTypeCmbBox);
 			this->settingsGroupBox->Controls->Add(this->packNameBox);
 			this->settingsGroupBox->Controls->Add(this->packNameLabel);
 			this->settingsGroupBox->Controls->Add(this->outputFolderLabel);
@@ -220,19 +235,72 @@ namespace PCTexture2PE_GUI {
 			this->settingsGroupBox->Controls->Add(this->inputFolderButton);
 			this->settingsGroupBox->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
 			this->settingsGroupBox->ForeColor = System::Drawing::SystemColors::ControlLight;
-			this->settingsGroupBox->Location = System::Drawing::Point(12, 17);
+			this->settingsGroupBox->Location = System::Drawing::Point(12, 7);
 			this->settingsGroupBox->Name = L"settingsGroupBox";
-			this->settingsGroupBox->Size = System::Drawing::Size(367, 112);
+			this->settingsGroupBox->Size = System::Drawing::Size(367, 132);
 			this->settingsGroupBox->TabIndex = 24;
 			this->settingsGroupBox->TabStop = false;
 			this->settingsGroupBox->Text = L"Settings";
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->BackColor = System::Drawing::SystemColors::ControlDarkDark;
+			this->label2->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label2->ForeColor = System::Drawing::SystemColors::ControlLightLight;
+			this->label2->Location = System::Drawing::Point(187, 23);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(66, 13);
+			this->label2->TabIndex = 26;
+			this->label2->Text = L"Output Type";
+			this->label2->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->BackColor = System::Drawing::SystemColors::ControlDarkDark;
+			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label1->ForeColor = System::Drawing::SystemColors::ControlLightLight;
+			this->label1->Location = System::Drawing::Point(8, 23);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(58, 13);
+			this->label1->TabIndex = 25;
+			this->label1->Text = L"Input Type";
+			this->label1->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			// 
+			// outTypeCmbBox
+			// 
+			this->outTypeCmbBox->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->outTypeCmbBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->outTypeCmbBox->FormattingEnabled = true;
+			this->outTypeCmbBox->Items->AddRange(gcnew cli::array< System::Object^  >(3) { L"Folder", L".zip", L".mcpack" });
+			this->outTypeCmbBox->Location = System::Drawing::Point(260, 20);
+			this->outTypeCmbBox->Name = L"outTypeCmbBox";
+			this->outTypeCmbBox->Size = System::Drawing::Size(99, 24);
+			this->outTypeCmbBox->TabIndex = 24;
+			// 
+			// inTypeCmbBox
+			// 
+			this->inTypeCmbBox->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->inTypeCmbBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->inTypeCmbBox->FormattingEnabled = true;
+			this->inTypeCmbBox->Items->AddRange(gcnew cli::array< System::Object^  >(2) { L"Folder", L".zip" });
+			this->inTypeCmbBox->Location = System::Drawing::Point(79, 20);
+			this->inTypeCmbBox->Name = L"inTypeCmbBox";
+			this->inTypeCmbBox->Size = System::Drawing::Size(95, 24);
+			this->inTypeCmbBox->TabIndex = 23;
+			this->inTypeCmbBox->SelectedIndexChanged += gcnew System::EventHandler(this, &MainForm::inTypeCmbBox_SelectedIndexChanged);
 			// 
 			// packNameLabel
 			// 
 			this->packNameLabel->AutoSize = true;
 			this->packNameLabel->BackColor = System::Drawing::SystemColors::ControlDarkDark;
 			this->packNameLabel->ForeColor = System::Drawing::SystemColors::ControlLightLight;
-			this->packNameLabel->Location = System::Drawing::Point(7, 79);
+			this->packNameLabel->Location = System::Drawing::Point(7, 109);
 			this->packNameLabel->Name = L"packNameLabel";
 			this->packNameLabel->Size = System::Drawing::Size(63, 13);
 			this->packNameLabel->TabIndex = 22;
@@ -246,7 +314,7 @@ namespace PCTexture2PE_GUI {
 			this->outputFolderLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular,
 				System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
 			this->outputFolderLabel->ForeColor = System::Drawing::SystemColors::ControlLightLight;
-			this->outputFolderLabel->Location = System::Drawing::Point(7, 50);
+			this->outputFolderLabel->Location = System::Drawing::Point(7, 83);
 			this->outputFolderLabel->Name = L"outputFolderLabel";
 			this->outputFolderLabel->Size = System::Drawing::Size(71, 13);
 			this->outputFolderLabel->TabIndex = 21;
@@ -260,7 +328,7 @@ namespace PCTexture2PE_GUI {
 			this->inputPackLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->inputPackLabel->ForeColor = System::Drawing::SystemColors::ControlLightLight;
-			this->inputPackLabel->Location = System::Drawing::Point(7, 21);
+			this->inputPackLabel->Location = System::Drawing::Point(7, 57);
 			this->inputPackLabel->Name = L"inputPackLabel";
 			this->inputPackLabel->Size = System::Drawing::Size(65, 13);
 			this->inputPackLabel->TabIndex = 20;
@@ -357,7 +425,16 @@ namespace PCTexture2PE_GUI {
 		if (!String::IsNullOrWhiteSpace(inputFile->FileName))
 		{
 			inputFolderBox->Text = inputFile->FileName;
-			String^ tmp = inputFile->FileName->Remove(inputFile->FileName->LastIndexOf("\\"));
+			String^ sbl4search;
+			if (this->inTypeCmbBox->SelectedIndex == 0) //input is a Folder
+			{
+				sbl4search = "\\"; //will remove the filename (pack.meta)
+			}
+			else //input is a .zip
+			{
+				sbl4search = "."; //will remove the ".zip"
+			}
+			String^ tmp = inputFile->FileName->Remove(inputFile->FileName->LastIndexOf(sbl4search));
 			packNameBox->Text = tmp->Substring(tmp->LastIndexOf("\\") + 1);
 		}
 	}
@@ -431,15 +508,66 @@ namespace PCTexture2PE_GUI {
 			Sleep(50);
 		}
 	}
+	
+	private: System::Void appendTex2Logbox(String^ text)
+	{
+		this->logBox->AppendText(text + "\r\n");
+		if (logcount > 0)
+		{
+			logcount--; //Prevents a log line from being skipped
+		}
+	}
+
 	private: System::Void bkWorker_converter_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
-		String^ tmp = inputFile->FileName->Remove(inputFile->FileName->LastIndexOf("\\"));
-		std::string pack = marshal_as< std::string >(tmp);
+		
+		std::string pack;
 		std::string name = marshal_as< std::string >(packNameBox->Text);
-		std::string output = marshal_as< std::string >(outputFolderBrowser->SelectedPath);
+		std::string output = marshal_as< std::string >(this->outputFolderBrowser->SelectedPath);
+
+		if (this->inTypeCmbBox->SelectedIndex == 0) //folder
+		{
+			String^ tmp = this->inputFile->FileName->Remove(this->inputFile->FileName->LastIndexOf("\\")); //remove the "pack.meta"
+			pack = marshal_as< std::string >(tmp);
+		}
+		else //.zip
+		{
+			pack = output + "\\" + name + "_tmp";
+			appendTex2Logbox("Extracting the zip file");
+			zip_api::extractAll(marshal_as< std::string >(this->inputFile->FileName), pack); //extract to a temp folder
+		}
+
 		ConverterFuncs::ConvertPack(pack, name, output);
-		Sleep(5000); //wait for the last log
+
+		if (this->outTypeCmbBox->SelectedIndex > 0) //.zip or .mcpack
+		{
+			appendTex2Logbox("Compressing the zip file");
+			zip_api::compressAll(output + "\\" + name + "_PE", output + "\\" + name +
+				marshal_as< std::string >(this->outTypeCmbBox->Text));  //ConverterDll puts "_PE"
+			String^ outFolder = marshal_as<String^>(output + "\\" + name + "_PE");
+			appendTex2Logbox("Deleting temp files: " + outFolder);
+			System::IO::Directory::Delete(outFolder, true); //delete the tmp folder from converter
+		}
+		
+		if (this->inTypeCmbBox->SelectedIndex > 0) //.zip
+		{
+			String^ _pack = marshal_as<String^>(pack);
+			appendTex2Logbox("Deleting temp files: " + _pack);
+			System::IO::Directory::Delete(_pack, true); //delete the tmp folder from .zip source
+		}
+
+		Sleep(1000); //wait for the last log
 		started = false;
 		System::Media::SystemSounds::Asterisk->Play();
+	}
+	private: System::Void inTypeCmbBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+		if (this->inTypeCmbBox->SelectedIndex == 0)
+		{
+			this->inputFile->Filter = L"pack.mcmeta|*.mcmeta";
+		}
+		else
+		{
+			this->inputFile->Filter = L"|*.zip";
+		}
 	}
 };
 }
