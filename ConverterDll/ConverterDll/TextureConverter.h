@@ -20,7 +20,6 @@ using namespace std;
 
 namespace ConverterFuncs {
 #ifdef Converter_EXPORTS
-	void Print(const string& text);
 	void delUseless(const string& path);
 	void fsCopy(const string& old_, const string& new_);
 	void fsCopyDir(const string& old_, const string& new_);
@@ -89,6 +88,8 @@ namespace ConverterFuncs {
 	};
 	error_code err;
 #endif
-	Converter_API int ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder);
+	Converter_API bool ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder);
 	Converter_API const std::vector<std::string> *GetLog();
+	Converter_API void Print(const std::string& text);
+	Converter_API void ClearLog();
 }

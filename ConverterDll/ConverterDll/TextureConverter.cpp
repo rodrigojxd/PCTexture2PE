@@ -10,7 +10,7 @@ using namespace cv;
 
 namespace ConverterFuncs {
 
-	void Print(const string & text)
+	Converter_API void Print(const string & text)
 	{
 		outputLog.push_back(text);
 	}
@@ -23,7 +23,10 @@ namespace ConverterFuncs {
 			{
 				Print("Deleting: " + fs::path(p).string());
 				fs::remove(p, err);
-				Print(err.message());
+				if (err.value() < 0)
+				{
+					Print(err.message());
+				}
 			}
 		}
 	}
@@ -33,7 +36,10 @@ namespace ConverterFuncs {
 		{
 			Print("Copying: " + old_);
 			fs::copy(old_, new_, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 		}
 	}
 	void fsCopyDir(const string& old_, const string& new_)
@@ -42,7 +48,10 @@ namespace ConverterFuncs {
 		{
 			Print("Copying: " + old_);
 			fs::copy(old_, new_, fs::copy_options::recursive, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 		}
 	}
 	void fsRename(const string& old_, const string& new_)
@@ -51,7 +60,10 @@ namespace ConverterFuncs {
 		{
 			Print("Renaming: " + old_);
 			fs::rename(old_, new_, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 		}
 	}
 	void fsRemove(const string& path)
@@ -60,7 +72,10 @@ namespace ConverterFuncs {
 		{
 			Print("Deleting: " + path);
 			fs::remove(path, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 		}
 	}
 	void fsRemoveAll(const string& path)
@@ -69,7 +84,10 @@ namespace ConverterFuncs {
 		{
 			Print("Deleting: " + path);
 			fs::remove_all(path, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 		}
 	}
 	void fsMoveFile(const string& old_, const string& new_)
@@ -78,9 +96,15 @@ namespace ConverterFuncs {
 		{
 			Print("Moving: " + old_);
 			fs::copy(old_, new_, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 			fs::remove(old_, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 		}
 	}
 	void fsMoveDir(const string& old_, const string& new_)
@@ -89,16 +113,25 @@ namespace ConverterFuncs {
 		{
 			Print("Moving: " + old_);
 			fs::copy(old_, new_, fs::copy_options::recursive, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 			fs::remove_all(old_, err);
-			Print(err.message());
+			if (err.value() < 0)
+			{
+				Print(err.message());
+			}
 		}
 	}
 	void fsCreate_directory(const string& path)
 	{
 		Print("Creating: " + path);
 		fs::create_directory(path, err);
-		Print(err.message());
+		if (err.value() < 0)
+		{
+			Print(err.message());
+		}
 	}
 	
 	const std::string newUUID()
@@ -748,31 +781,25 @@ namespace ConverterFuncs {
 		file << s;
 	}
 
-	int ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder)
+	Converter_API bool ConvertPack(const std::string& inPack, const std::string& packname, const std::string& output_folder)
 	{
-		//reset the log
-		outputLog.clear();
-
-		Print("Starting...");
-
 		//check the pack
 		if (packname == "")
 		{
 			Print("Error: Input texture pack folder not found.");
-			return -1;
+			return false;
 		}
 
 		if (!fs::exists(inPack + "\\pack.mcmeta"))
 		{
 			Print("Error: 'pack.mcmeta' not found. Check the pack and try again.");
-			return -1;
+			return false;
 		}
 
 		//folder of the ouput pack 
-		const string outPack = output_folder + "\\" + packname + "_PE";
+		const string outPack = output_folder + "\\" + packname;
 
 		//Clean the folder if it already exists
-		fsRemoveAll(outPack);
 		fsCreate_directory(outPack);
 
 		//sets up the manifest
@@ -791,21 +818,10 @@ namespace ConverterFuncs {
 		if (manifest.fail())
 		{
 			Print("Error: Failed to save file: 'pack_manifest.json'.");
-			return -1;
+			return false;
 		}
 		manifest << manifestModel;
 		manifest.close();
-
-		//for android don't include the images on galery
-		//TODO : remove it after 1.0 release
-		ofstream nomedia;
-		Print("Creating: " + outPack + "\\.nomedia");
-		nomedia.open(outPack + "\\.nomedia");
-		if (nomedia.fail())
-		{
-			Print("Error: Failed to save file: '.nomedia'.");
-		}
-		nomedia.close();
 
 		//Some texture directories
 		const string blocksPath = outPack + "\\textures\\blocks\\";
@@ -1283,13 +1299,15 @@ namespace ConverterFuncs {
 
 		CheckForAnimated(itemsPath);
 		CheckForAnimated(blocksPath);
-
-		Print("\r\nDone!\r\n");
-		return 0;
+		return true;
 	}
-	const std::vector<std::string> *GetLog()
+	Converter_API const std::vector<std::string> *GetLog()
 	{
 		return &outputLog;
+	}
+	Converter_API void ClearLog()
+	{
+		outputLog.clear();
 	}
 }
 

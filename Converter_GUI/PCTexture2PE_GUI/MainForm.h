@@ -394,6 +394,7 @@ namespace PCTexture2PE_GUI {
 	{
 		if (!started)
 		{
+			started = true;
 			bool invalidpack = !System::IO::File::Exists(inputFile->FileName);
 			bool invalidoutput = !System::IO::Directory::Exists(outputFolderBrowser->SelectedPath);
 			bool invalidname = String::IsNullOrWhiteSpace(packNameBox->Text);
@@ -414,7 +415,10 @@ namespace PCTexture2PE_GUI {
 				return;
 			}
 
-			started = true;
+			this->logBox->Text = ""; //clean the logbox
+			ConverterFuncs::ClearLog();
+			logcount = 0; //reset the counter
+
 			this->bkWorker_logbox->RunWorkerAsync();
 			this->bkWorker_converter->RunWorkerAsync();
 		}
@@ -495,72 +499,113 @@ namespace PCTexture2PE_GUI {
 		outputFolderBrowser->SelectedPath = outputFolderBox->Text;
 	}
 	private: System::Void bkWorker_logbox_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
-		this->logBox->Text = ""; //clean the logbox
-		this->logBox->Update(); //force a update
-		logcount = 0; //reset the counter
+		const std::vector<std::string>* log = ConverterFuncs::GetLog();
 		while (started)
 		{
-			const std::vector<std::string>* log = ConverterFuncs::GetLog();
 			int sz1 = log->size();
 			if (sz1 > logcount) //If there is any new log
 			{
 				for (int i = logcount; i < sz1; ++i) //Looks at all the lines of the log that are not yet in the box
 				{
 					this->logBox->AppendText(toSysString(log->at(i) + "\r\n")); //add the log
+					logcount++;
 				}
-				logcount++;
 			}
 			Sleep(50);
 		}
 	}
 	
-	private: System::Void appendTex2Logbox(String^ text)
-	{
-		this->logBox->AppendText(text + "\r\n");
-		if (logcount > 0)
-		{
-			logcount--; //Prevents a log line from being skipped
-		}
-	}
-
+#ifdef GetTempPath
+#undef GetTempPath //System::IO::Path::GetTempPath() conflicts with that
+#endif // GetTempPath
 	private: System::Void bkWorker_converter_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e) {
 		
 		String^ pack;
 		String^ name = this->packNameBox->Text;
 		String^ output = this->outputFolderBrowser->SelectedPath;
-
+		String^ tmpOutput = System::IO::Path::GetTempPath() + "PCTexture2PE";
+		System::IO::Directory::CreateDirectory(tmpOutput);
+		
 		if (this->inTypeCmbBox->SelectedIndex == 0) //folder
 		{
 			pack = this->inputFile->FileName->Remove(this->inputFile->FileName->LastIndexOf("\\")); //remove the "pack.meta"
 		}
 		else //.zip
 		{
-			pack = output + "\\" + name + "_tmp";
-			appendTex2Logbox("Extracting the zip file");
+			pack = tmpOutput + "\\" + name + "_tmp";
+			ConverterFuncs::Print("Extracting the zip file");
 			zip_api::extractAll(toStdString(this->inputFile->FileName), toStdString(pack)); //extract to a temp folder
 		}
 
-		ConverterFuncs::ConvertPack(toStdString(pack), toStdString(name), toStdString(output));
-
-		if (this->outTypeCmbBox->SelectedIndex > 0) //.zip or .mcpack
+		if (ConverterFuncs::ConvertPack(toStdString(pack), toStdString(name), toStdString(tmpOutput)))
 		{
-			String^ outFolder = output + "\\" + name + "_PE"; //ConverterDll puts "_PE"
-			appendTex2Logbox("Compressing the zip file");
-			zip_api::compressAll(toStdString(outFolder),
-				toStdString(output + "\\" + name + this->outTypeCmbBox->Text));
-			appendTex2Logbox("Deleting temp files: " + outFolder);
-			System::IO::Directory::Delete(outFolder, true); //delete the tmp folder from converter
+			if (this->outTypeCmbBox->SelectedIndex > 0) //.zip or .mcpack
+			{
+				String^ outFolder = tmpOutput + "\\" + name;
+				String^ zipPath = output + "\\" + name;
+				ConverterFuncs::Print("Compressing the zip file");
+				if (System::IO::File::Exists(zipPath + this->outTypeCmbBox->Text))
+				{ //if the file exists add "(1)", "(2)" etc like windows explorer
+					if (MessageBox::Show("A file with the same name alread exists. Do you want to replace it?",
+						"PCTexture2PE", MessageBoxButtons::YesNo,
+						MessageBoxIcon::Warning) == System::Windows::Forms::DialogResult::No)
+					{
+						String^ tmp = zipPath;
+						int errcount = 0;
+						while (System::IO::File::Exists(tmp + this->outTypeCmbBox->Text))
+						{
+							tmp = zipPath;
+							errcount++;
+							tmp += " (" + errcount + ")";
+						}
+						zipPath = tmp;
+					}
+					else
+					{
+						System::IO::File::Delete(zipPath + this->outTypeCmbBox->Text);
+					}
+				}
+				zip_api::compressAll(toStdString(outFolder),
+					toStdString(zipPath + this->outTypeCmbBox->Text));
+			}
+			else
+			{
+				ConverterFuncs::Print("Moving the converted pack");
+				String^ outfolder = output + "\\" + name;
+				if (System::IO::Directory::Exists(outfolder))
+				{
+					if (MessageBox::Show("A folder with the same name alread exists. Do you want to replace it?",
+						"PCTexture2PE", MessageBoxButtons::YesNo,
+						MessageBoxIcon::Warning) == System::Windows::Forms::DialogResult::No)
+					{
+						String^ tmp = outfolder;
+						int errcount = 0;
+						while (System::IO::Directory::Exists(tmp))
+						{
+							tmp = outfolder;
+							errcount++;
+							tmp += " (" + errcount + ")";
+						}
+						outfolder = tmp;
+					}
+					else
+					{
+						System::IO::Directory::Delete(outfolder, true);
+					}
+				}
+				System::IO::Directory::Move(tmpOutput + "\\" + name, outfolder);
+			}
+			ConverterFuncs::Print("Deleting temp files");
+			System::IO::Directory::Delete(tmpOutput, true); //delete the tmp folder
+			System::Media::SystemSounds::Asterisk->Play();
+			ConverterFuncs::Print("Done!");
 		}
-		
-		if (this->inTypeCmbBox->SelectedIndex > 0) //.zip
+		else
 		{
-			appendTex2Logbox("Deleting temp files: " + pack);
-			System::IO::Directory::Delete(pack, true); //delete the tmp folder from .zip source
+			ConverterFuncs::Print("Faled to covert the pack. Check the files and try again");
 		}
-
 		Sleep(1000); //wait for the last log
 		started = false;
-		System::Media::SystemSounds::Asterisk->Play();
 	}
 	private: System::Void inTypeCmbBox_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
 		if (this->inTypeCmbBox->SelectedIndex == 0)
