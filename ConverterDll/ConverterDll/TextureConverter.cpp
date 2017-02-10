@@ -21,12 +21,7 @@ namespace ConverterFuncs {
 			if (fs::path(p).extension() == ".ini" || fs::path(p).extension() == ".bd" ||
 				fs::path(p).extension() == ".mcmeta" || fs::path(p).extension() == ".DS_Store")
 			{
-				Print("Deleting: " + fs::path(p).string());
-				fs::remove(p, err);
-				if (err.value() < 0)
-				{
-					Print(err.message());
-				}
+				fsRemove(fs::path(p).string());
 			}
 		}
 	}
@@ -36,7 +31,7 @@ namespace ConverterFuncs {
 		{
 			Print("Copying: " + old_);
 			fs::copy(old_, new_, err);
-			if (err.value() < 0)
+			if (err)
 			{
 				Print(err.message());
 			}
@@ -48,7 +43,7 @@ namespace ConverterFuncs {
 		{
 			Print("Copying: " + old_);
 			fs::copy(old_, new_, fs::copy_options::recursive, err);
-			if (err.value() < 0)
+			if (err)
 			{
 				Print(err.message());
 			}
@@ -60,7 +55,7 @@ namespace ConverterFuncs {
 		{
 			Print("Renaming: " + old_);
 			fs::rename(old_, new_, err);
-			if (err.value() < 0)
+			if (err)
 			{
 				Print(err.message());
 			}
@@ -72,7 +67,7 @@ namespace ConverterFuncs {
 		{
 			Print("Deleting: " + path);
 			fs::remove(path, err);
-			if (err.value() < 0)
+			if (err)
 			{
 				Print(err.message());
 			}
@@ -84,7 +79,7 @@ namespace ConverterFuncs {
 		{
 			Print("Deleting: " + path);
 			fs::remove_all(path, err);
-			if (err.value() < 0)
+			if (err)
 			{
 				Print(err.message());
 			}
@@ -96,15 +91,11 @@ namespace ConverterFuncs {
 		{
 			Print("Moving: " + old_);
 			fs::copy(old_, new_, err);
-			if (err.value() < 0)
+			if (err)
 			{
 				Print(err.message());
 			}
-			fs::remove(old_, err);
-			if (err.value() < 0)
-			{
-				Print(err.message());
-			}
+			fsRemove(old_);
 		}
 	}
 	void fsMoveDir(const string& old_, const string& new_)
@@ -113,22 +104,18 @@ namespace ConverterFuncs {
 		{
 			Print("Moving: " + old_);
 			fs::copy(old_, new_, fs::copy_options::recursive, err);
-			if (err.value() < 0)
+			if (err)
 			{
 				Print(err.message());
 			}
-			fs::remove_all(old_, err);
-			if (err.value() < 0)
-			{
-				Print(err.message());
-			}
+			fsRemoveAll(old_);
 		}
 	}
 	void fsCreate_directory(const string& path)
 	{
 		Print("Creating: " + path);
 		fs::create_directory(path, err);
-		if (err.value() < 0)
+		if (err)
 		{
 			Print(err.message());
 		}
