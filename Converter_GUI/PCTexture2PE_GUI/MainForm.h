@@ -546,7 +546,7 @@ namespace PCTexture2PE_GUI {
 				ConverterFuncs::Print("Compressing the zip file");
 				if (System::IO::File::Exists(zipPath + this->outTypeCmbBox->Text))
 				{ //if the file exists add "(1)", "(2)" etc like windows explorer
-					if (MessageBox::Show("A file with the same name alread exists. Do you want to replace it?",
+					if (MessageBox::Show("A file with the same name already exists. Do you want to replace it?",
 						"PCTexture2PE", MessageBoxButtons::YesNo,
 						MessageBoxIcon::Warning) == System::Windows::Forms::DialogResult::No)
 					{
@@ -574,7 +574,7 @@ namespace PCTexture2PE_GUI {
 				String^ outfolder = output + "\\" + name;
 				if (System::IO::Directory::Exists(outfolder))
 				{
-					if (MessageBox::Show("A folder with the same name alread exists. Do you want to replace it?",
+					if (MessageBox::Show("A folder with the same name already exists. Do you want to replace it?",
 						"PCTexture2PE", MessageBoxButtons::YesNo,
 						MessageBoxIcon::Warning) == System::Windows::Forms::DialogResult::No)
 					{
@@ -602,7 +602,7 @@ namespace PCTexture2PE_GUI {
 		}
 		else
 		{
-			ConverterFuncs::Print("Faled to covert the pack. Check the files and try again");
+			ConverterFuncs::Print("Failed to convert the pack. Check the files and try again.");
 		}
 		Sleep(1000); //wait for the last log
 		started = false;
