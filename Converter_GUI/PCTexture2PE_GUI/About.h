@@ -105,7 +105,7 @@ namespace PCTexture2PE_GUI {
 			this->versionLabel->Name = L"versionLabel";
 			this->versionLabel->Size = System::Drawing::Size(97, 16);
 			this->versionLabel->TabIndex = 12;
-			this->versionLabel->Text = L"Version: 1.0.1.3";
+			this->versionLabel->Text = L"Version: 1.0.2.0";
 			// 
 			// ForumLinkLabel
 			// 
