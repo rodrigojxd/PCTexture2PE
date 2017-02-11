@@ -55,6 +55,9 @@ namespace ConverterFuncs {
 	void CreateCauldronWater(const string& path, const string& newPath);
 	void CheckForAnimated(const string& path);
 	void CropTripWire(const string& path);
+	void MountChestSide(const string& entitychest, const string& dst);
+	void MountChestFront(const string& entitychest, const string& dst);
+	void MountChestTop(const string& entitychest, const string& dst);
 	
 	void operator << (ofstream& file, vector<string>& vec);
 	

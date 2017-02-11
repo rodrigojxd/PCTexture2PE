@@ -757,6 +757,84 @@ namespace ConverterFuncs {
 			}
 		}
 	}
+
+	void MountChestSide(const string & entitychest, const string& dst)
+	{
+		if (fs::exists(entitychest))
+		{
+			Mat source = imread(entitychest, IMREAD_UNCHANGED);
+			if (!source.empty())
+			{
+				//get the texture resolution multiplier
+				int multp = source.rows / 64;
+				//copy the top of side texture
+				Mat ROI(source, Rect(0, 14 * multp, 14 * multp, 5 * multp));
+				//copy the bottom of side texture
+				Mat ROI2(source, Rect(0, 34 * multp, 14 * multp, 9 * multp));
+
+				//create a 14*multp x 14*multp empty image
+				Mat dst_ = Mat(14 * multp, 14 * multp, source.type(), Scalar(0, 0, 0, 0));
+				//mark the position of dst_ where will paste the ROI
+				Mat ROId(dst_, Rect(0, 0, 14 * multp, 5 * multp));
+				//paste the ROI to the specift position
+				ROI.copyTo(ROId);
+				//mark the position of dst_ where will paste the ROI2
+				ROId = Mat(dst_, Rect(0, 5 * multp, 14 * multp, 9 * multp));
+				ROI2.copyTo(ROId);
+				
+				//resize the image to 16*multp x 16*multp
+				resize(dst_, dst_, Size(16 * multp, 16 * multp), 0.0, 0.0, INTER_NEAREST);
+
+				imwrite(dst, dst_);
+			}
+		}
+	}
+	void MountChestFront(const string & entitychest, const string & dst)
+	{
+		if (fs::exists(entitychest))
+		{
+			Mat source = imread(entitychest, IMREAD_UNCHANGED);
+			if (!source.empty())
+			{
+				int multp = source.rows / 64;
+				Mat ROI(source, Rect(14 * multp, 14 * multp, 14 * multp, 5 * multp));
+				Mat ROI2(source, Rect(14 * multp, 34 * multp, 14 * multp, 9 * multp));
+				Mat ROI3(source, Rect(4 * multp, multp, 2 * multp, 4 * multp));
+
+				Mat dst_ = Mat(14 * multp, 14 * multp, source.type(), Scalar(0, 0, 0, 0));
+				Mat ROId(dst_, Rect(0, 0, 14 * multp, 5 * multp));
+				ROI.copyTo(ROId);
+				ROId = Mat(dst_, Rect(0, 5 * multp, 14 * multp, 9 * multp));
+				ROI2.copyTo(ROId);
+				ROId = Mat(dst_, Rect(6 * multp, 3 * multp, 2 * multp, 4 * multp));
+				ROI3.copyTo(ROId);
+
+				resize(dst_, dst_, Size(16 * multp, 16 * multp), 0.0, 0.0, INTER_NEAREST);
+
+				imwrite(dst, dst_);
+			}
+		}
+	}
+	void MountChestTop(const string & entitychest, const string & dst)
+	{
+		if (fs::exists(entitychest))
+		{
+			Mat source = imread(entitychest, IMREAD_UNCHANGED);
+			if (!source.empty())
+			{
+				int multp = source.rows / 64;
+				Mat ROI(source, Rect(14 * multp, 0, 14 * multp, 14 * multp));
+
+				Mat dst_ = Mat(14 * multp, 14 * multp, source.type(), Scalar(0, 0, 0, 0));
+				Mat ROId(dst_, Rect(0, 0, 14 * multp, 14 * multp));
+				ROI.copyTo(ROId);
+
+				resize(dst_, dst_, Size(16 * multp, 16 * multp), 0.0, 0.0, INTER_NEAREST);
+
+				imwrite(dst, dst_);
+			}
+		}
+	}
 	
 	void operator << (ofstream& file, vector<string>& vec)
 	{
@@ -1123,6 +1201,14 @@ namespace ConverterFuncs {
 		CreateStatic(blocksPath + "cauldron_water.png", blocksPath + "cauldron_water_placeholder.png");
 		
 		CropTripWire(blocksPath + "trip_wire.png");
+		
+		MountChestSide(entityPath + "chest\\normal.png", blocksPath + "chest_side.png");
+		MountChestFront(entityPath + "chest\\normal.png", blocksPath + "chest_front.png");
+		MountChestTop(entityPath + "chest\\normal.png", blocksPath + "chest_top.png");
+		MountChestSide(entityPath + "chest\\ender.png", blocksPath + "ender_chest_side.png");
+		MountChestFront(entityPath + "chest\\ender.png", blocksPath + "ender_chest_front.png");
+		MountChestTop(entityPath + "chest\\ender.png", blocksPath + "ender_chest_top.png");
+		MountChestFront(entityPath + "chest\\trapped.png", blocksPath + "trapped_chest_front.png");
 
 		//del useless files
 		{
