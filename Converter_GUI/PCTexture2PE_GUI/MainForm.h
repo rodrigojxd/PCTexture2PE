@@ -400,17 +400,17 @@ namespace PCTexture2PE_GUI {
 
 			if (invalidpack)
 			{
-				MessageBox::Show("Invalid MCPC Pack");
+				MessageBox::Show("Invalid MCPC Pack", "PCTexture2PE");
 				return;
 			}
 			if (invalidoutput)
 			{
-				MessageBox::Show("Invalid Output Folder");
+				MessageBox::Show("Invalid Output Folder", "PCTexture2PE");
 				return;
 			}
 			if (invalidname)
 			{
-				MessageBox::Show("Invalid Pack Name");
+				MessageBox::Show("Invalid Pack Name", "PCTexture2PE");
 				return;
 			}
 			started = true;
