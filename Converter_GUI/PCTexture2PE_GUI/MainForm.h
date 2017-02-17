@@ -394,7 +394,6 @@ namespace PCTexture2PE_GUI {
 	{
 		if (!started)
 		{
-			started = true;
 			bool invalidpack = !System::IO::File::Exists(inputFile->FileName);
 			bool invalidoutput = !System::IO::Directory::Exists(outputFolderBrowser->SelectedPath);
 			bool invalidname = String::IsNullOrWhiteSpace(packNameBox->Text);
@@ -414,7 +413,7 @@ namespace PCTexture2PE_GUI {
 				MessageBox::Show("Invalid Pack Name");
 				return;
 			}
-
+			started = true;
 			this->logBox->Text = ""; //clean the logbox
 			ConverterFuncs::ClearLog();
 			logcount = 0; //reset the counter
