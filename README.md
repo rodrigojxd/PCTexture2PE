@@ -14,11 +14,4 @@ Clone this repository.
 git clone https://github.com/rodrigojxd/PCTexture2PE.git
 ```
 
-Download the OpenCV files. Create a folder named "opencv" in the directory "ProjectFolder/ConverterDll/ConverterDl" and extract the two folders from .zip file to this folder.
-(If you want you can compile your own binaries from [opencv repository](https://github.com/opencv/opencv))
-
-```
-https://github.com/rodrigojxd/PCTexture2PE/files/629215/opencv_files.zip
-```
-
-Open PCTexture2PE.sln in the Visual Studio and change the settings to Release and x86. After that, click Build.
+Open PCTexture2PE.sln in the Visual Studio and change the settings to x86 (and Release if you want). After that, click Build.
