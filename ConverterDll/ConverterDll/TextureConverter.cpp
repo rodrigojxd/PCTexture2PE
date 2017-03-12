@@ -2,11 +2,14 @@
 #include <Windows.h>
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 #include "tga.h"
 #include "opencv2/imgcodecs.hpp"
+#include "json.hpp"
 
 namespace fs = std::experimental::filesystem;
 using namespace cv;
+using json = nlohmann::json;
 
 namespace ConverterFuncs {
 
@@ -863,30 +866,52 @@ namespace ConverterFuncs {
 
 		//folder of the ouput pack 
 		const string outPack = output_folder + "\\" + packname;
-
-		//Clean the folder if it already exists
 		fsCreate_directory(outPack);
 
-		//sets up the manifest
-		const string description = "Converted by PCTexture2PE";
-
-		manifestModel[1] = newUUID();
-		manifestModel[3] = packname;
-		manifestModel[5] = manifestModel[7] = description;
-		manifestModel[9] = newUUID();
-
-		ofstream manifest;
-		
-
-		Print("Creating: " + outPack + "\\pack_manifest.json");
-		manifest.open(outPack + "\\pack_manifest.json");
-		if (manifest.fail())
+		////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////  Manifest  //////////////////////////////////
 		{
-			Print("Error: Failed to save file: 'pack_manifest.json'.");
-			return false;
+			std::ifstream pack_mcmeta(inPack + "\\pack.mcmeta");
+			if (pack_mcmeta.fail())
+			{
+				Print("Error: Failed to open the file: 'pack.mcmeta'.");
+				return false;
+			}
+			json pack_mcmeta_json;
+
+			pack_mcmeta >> pack_mcmeta_json;
+			pack_mcmeta.close();
+
+			const string pack_description = pack_mcmeta_json["pack"]["description"];
+
+			std::ifstream mTemplate("data\\manifest.json");
+			if (mTemplate.fail())
+			{
+				Print("Error: Failed to open the file: 'data\\manifest.json'.");
+				return false;
+			}
+			json manifest;
+
+			mTemplate >> manifest;
+			mTemplate.close();
+
+			manifest["header"]["name"] = packname;
+			manifest["header"]["description"] = pack_description;
+			manifest["header"]["uuid"] = newUUID();
+			manifest["modules"][0]["description"] = pack_description;
+			manifest["modules"][0]["uuid"] = newUUID();
+
+			std::ofstream outManifest(outPack + "\\manifest.json");
+			if (outManifest.fail())
+			{
+				Print("Error: Failed to save the file: 'manifest.json'.");
+				return false;
+			}
+			outManifest << std::setw(4) << manifest;
+			outManifest.close();
 		}
-		manifest << manifestModel;
-		manifest.close();
+		////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////
 
 		//Some texture directories
 		const string blocksPath = outPack + "\\textures\\blocks\\";

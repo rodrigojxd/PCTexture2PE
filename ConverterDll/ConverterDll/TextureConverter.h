@@ -5,7 +5,6 @@
 #ifdef Converter_EXPORTS
 #define Converter_API __declspec(dllexport)
 
-#include <sstream>
 #include <Rpc.h> //for UUID (need to include RpcRT4.Lib from windows kits)
 
 //image editing
@@ -62,19 +61,6 @@ namespace ConverterFuncs {
 	void operator << (ofstream& file, vector<string>& vec);
 	
 	std::vector<std::string> outputLog;
-	vector<string> manifestModel = {
-		"{\n  \"header\": {\n    \"pack_id\": \"",
-		"ID",
-		"\",\n    \"name\": \"",
-		"NAME",
-		"\",\n    \"packs_version\": \"0.0.1\",\n    \"description\": \"",
-		"DESCRIPTION",
-		"\",\n    \"modules\": [\n      {\n        \"description\": \"",
-		"DESCRIPTION",
-		"\",\n        \"version\": \"0.0.1\",\n        \"uuid\": \"",
-		"UUID",
-		"\",\n        \"type\": \"resources\"\n      }\n    ]\n  }\n}"
-	};
 	const vector<string> defaultAnimated = {
 		"cauldron_water.png",
 		"fire_0.png",
