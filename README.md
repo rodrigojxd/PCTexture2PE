@@ -15,3 +15,8 @@ git clone https://github.com/rodrigojxd/PCTexture2PE.git
 ```
 
 Open PCTexture2PE.sln in the Visual Studio and change the settings to x86 (and Release if you want). After that, click Build.
+
+## Licenses
+
+[Zip Lib](https://github.com/rodrigojxd/PCTexture2PE/blob/master/ZIP_API/Licence.txt)
+[Json API](https://github.com/nlohmann/json#license)

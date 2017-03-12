@@ -447,6 +447,9 @@
     <ClInclude Include="opencv\include\opencv2\world.hpp">
       <Filter>opencv</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TextureConverter.cpp">
